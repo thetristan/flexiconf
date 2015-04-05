@@ -1,8 +1,8 @@
 package se.blea.flexiconf.cli;
 
-import se.blea.flexiconf.ConfigOptions;
-import se.blea.flexiconf.Schema;
-import se.blea.flexiconf.SchemaOptions;
+import se.blea.flexiconf.config.ConfigOptions;
+import se.blea.flexiconf.schema.Schema;
+import se.blea.flexiconf.schema.SchemaOptions;
 import se.blea.flexiconf.javaapi.*;
 
 import java.util.List;

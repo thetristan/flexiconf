@@ -1,6 +1,7 @@
 package se.blea.flexiconf
 
 import org.scalatest.{FlatSpec, Matchers}
+import se.blea.flexiconf.argument._
 
 /** Test cases for Arguments */
 class ArgumentSpec extends FlatSpec with Matchers {

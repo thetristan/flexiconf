@@ -1,8 +1,9 @@
-package se.blea.flexiconf.docgen
+package se.blea.flexiconf.documentation
 
 import org.pegdown.PegDownProcessor
-import se.blea.flexiconf.DirectiveFlags.AllowOnce
-import se.blea.flexiconf.{DirectiveFlags, SchemaNode}
+import se.blea.flexiconf.directive.DirectiveFlags
+import DirectiveFlags.AllowOnce
+import se.blea.flexiconf.schema.SchemaNode
 
 trait DocumentationGenerator {
   def process(node: SchemaNode): String

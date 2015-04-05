@@ -1,10 +1,11 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.documentation
 
 import org.antlr.v4.runtime.ParserRuleContext
-import se.blea.flexiconf.parser.gen.SchemaParser.{DocumentationContentContext, DocumentationLineContext, DocumentationBlockContext}
+import se.blea.flexiconf.parser.gen.SchemaParser.{DocumentationBlockContext, DocumentationContentContext, DocumentationLineContext}
 import se.blea.flexiconf.parser.gen.SchemaParserBaseVisitor
 
 import scala.collection.JavaConversions._
+
 
 /** Returns a Seq of strings for a given context */
 private[flexiconf] object DocumentationVisitor extends SchemaParserBaseVisitor[String] {

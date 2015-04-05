@@ -1,4 +1,4 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.util
 
 import org.antlr.v4.runtime.ParserRuleContext
 

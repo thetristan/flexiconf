@@ -1,15 +1,12 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parameter
 
 import org.antlr.v4.runtime.ParserRuleContext
+import se.blea.flexiconf.argument._
 import se.blea.flexiconf.parser.gen.SchemaParser._
 import se.blea.flexiconf.parser.gen.SchemaParserBaseVisitor
 
 import scala.collection.JavaConversions._
 
-/** Container for defining the arguments a directive accepts: requires a name and type */
-case class Parameter(name: String, kind: ArgumentKind[_] = StringArgument) {
-  override def toString = s"$name:$kind"
-}
 
 /** Returns an ArgumentType for supported parameter types */
 private[flexiconf] object ParameterTypeVisitor extends SchemaParserBaseVisitor[ArgumentKind[_]] {

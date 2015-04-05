@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream
 
 import org.antlr.v4.runtime.{CommonTokenStream, ANTLRInputStream}
 import org.scalatest.{Matchers, FlatSpec}
+import se.blea.flexiconf.argument.{StringArgument, DecimalArgument, IntArgument, BoolArgument}
 import se.blea.flexiconf.parser.gen.{SchemaParser, SchemaLexer}
+import se.blea.flexiconf.schema.{SchemaVisitorOptions, SchemaVisitor}
 
 /** Test cases for  */
 class SchemaSpec extends FlatSpec with Matchers {
@@ -17,7 +19,7 @@ class SchemaSpec extends FlatSpec with Matchers {
     val document = parser.document()
 
     val opts = SchemaVisitorOptions("test")
-    val visitor = new SchemaNodeVisitor(opts)
+    val visitor = new SchemaVisitor(opts)
 
     visitor.visitDocument(document)
   }

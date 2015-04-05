@@ -3,7 +3,9 @@ package se.blea.flexiconf.cli
 import java.io.{FileWriter, File}
 
 import se.blea.flexiconf._
-import se.blea.flexiconf.docgen.MarkdownDocumentationGenerator
+import se.blea.flexiconf.config.ConfigOptions
+import se.blea.flexiconf.documentation.MarkdownDocumentationGenerator
+import se.blea.flexiconf.schema.SchemaOptions
 
 object ScalaCLI {
   def main(args: Array[String]): Unit = {

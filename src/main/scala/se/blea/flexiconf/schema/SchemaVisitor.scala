@@ -1,112 +1,24 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.schema
 
 import org.antlr.v4.runtime.ParserRuleContext
+import se.blea.flexiconf._
+import se.blea.flexiconf.directive.DirectiveFlagsVisitor
+import se.blea.flexiconf.documentation.DocumentationVisitor
+import se.blea.flexiconf.parameter.{ParameterVisitor, Parameter}
 import se.blea.flexiconf.parser.gen.SchemaParser._
 import se.blea.flexiconf.parser.gen.SchemaParserBaseVisitor
+import se.blea.flexiconf.util.{Stack, Source}
 
 import scala.collection.JavaConversions._
 
-trait SchemaNode {
-  def name:String
-  def parameters: List[Parameter]
-  def source: Source
-  def flags: Set[DirectiveFlag]
-  def documentation: String
-  def children: List[SchemaNode]
-  def toDirectives: Set[DirectiveDefinition]
-}
 
-case class Schema(private val rawSchema: DefaultSchemaNode) extends SchemaNode {
-  private lazy val schema = rawSchema.collapse
-
-  override def name: String = schema.name
-  override def children: List[SchemaNode] = schema.children
-  override def parameters: List[Parameter] = schema.parameters
-  override def source: Source = schema.source
-  override def documentation: String = schema.documentation
-  override def flags: Set[DirectiveFlag] = schema.flags
-  override def toDirectives: Set[DirectiveDefinition] = schema.toDirectives
-}
-
-private[flexiconf] case class DefaultSchemaNode(name: String,
-                                             parameters: List[Parameter],
-                                             source: Source,
-                                             flags: Set[DirectiveFlag] = Set.empty,
-                                             documentation: String = "",
-                                             children: List[DefaultSchemaNode] = List.empty) extends SchemaNode {
-
-  // Parameter validation
-
-  // Names must be unique
-  val paramNames = parameters.map(_.name)
-  if (paramNames.size != paramNames.toSet.size) {
-    throw new IllegalStateException(s"Directive '$name' must use a unique name for each parameter at $source")
-  }
-
-  // Parameter types must be known
-  parameters.foreach { p =>
-    if (p.kind == UnknownArgument) {
-      throw new IllegalStateException(s"Unknown type for parameter '${p.name}' at $source")
-    }
-  }
-
-  override def toDirectives: Set[DirectiveDefinition] = {
-    children.map(_.toDirective).toSet
-  }
-
-  /** Collapse the tree and remove all internal nodes */
-  def collapse: DefaultSchemaNode = {
-    copy(children = children.flatMap { node =>
-      if (node.name.startsWith("$")) {
-        node.collapse.children
-      } else {
-        List(node.collapse)
-      }
-    })
-  }
-
-  /** Convert this SchemaNode to a tree of directives */
-  def toDirective: DirectiveDefinition = {
-    DirectiveDefinition.withUnsafeName(name)
-      .withParameters(parameters)
-      .withFlags(flags)
-      .withDocumentation(documentation)
-      .withDirectives(collapse.children.map(_.toDirective):_*)
-      .build
-  }
-
-  override def toString = {
-    var res = name
-
-    if (parameters.nonEmpty) {
-      res ++= (parameters map (_.toString)).mkString(" ", " ", "")
-    }
-
-    if (flags != DirectiveFlags()) {
-      res ++= s" $flags"
-    }
-
-    res ++ s" ($source)"
-  }
-
-  /** Return a string representing a configuration tree */
-  def renderTree(depth: Int = 0): String = {
-    val sb = StringBuilder.newBuilder
-
-    sb ++= ("  " * depth)
-    sb ++= s"> $this\n"
-    sb ++= children flatMap (_.renderTree(depth + 1))
-
-    sb.mkString
-  }
-}
-
-
+/** Options for parsing schemas */
 case class SchemaVisitorOptions(sourceFile: String,
                                 allowMissingGroups: Boolean = false)
 
+
 /** Not all data can be carried on the stack, so we have an additional context object that carries this state */
-private[flexiconf] case class SchemaNodeVisitorContext(var groupsByNode: Map[DefaultSchemaNode, Map[String, DirectiveListContext]] = Map.empty) {
+private[flexiconf] case class SchemaVisitorContext(var groupsByNode: Map[DefaultSchemaNode, Map[String, DirectiveListContext]] = Map.empty) {
 
   /** Associate a named group of directives with the closest, non-internal node or the root node */
   def addGroup(node: DefaultSchemaNode, name: String, directives: DirectiveListContext): Unit = {
@@ -120,9 +32,11 @@ private[flexiconf] case class SchemaNodeVisitorContext(var groupsByNode: Map[Def
   }
 }
 
-private[flexiconf] case class SchemaNodeVisitor(options: SchemaVisitorOptions,
-                                             stack: Stack[DefaultSchemaNode] = Stack.empty,
-                                             visitorCtx: SchemaNodeVisitorContext = SchemaNodeVisitorContext())
+
+/** Visitor that parses schemas */
+private[flexiconf] case class SchemaVisitor(options: SchemaVisitorOptions,
+                                            stack: Stack[DefaultSchemaNode] = Stack.empty,
+                                            visitorCtx: SchemaVisitorContext = SchemaVisitorContext())
   extends SchemaParserBaseVisitor[Option[DefaultSchemaNode]] {
 
   /** Entry point for a schema file */
@@ -143,7 +57,7 @@ private[flexiconf] case class SchemaNodeVisitor(options: SchemaVisitorOptions,
     val inputStream = Parser.streamFromSourceFile(pattern)
     val parser = Parser.antlrSchemaParserFromStream(inputStream)
 
-    SchemaNodeVisitor(options.copy(sourceFile = pattern), stack).visitDocument(parser.document()) map { list =>
+    SchemaVisitor(options.copy(sourceFile = pattern), stack).visitDocument(parser.document()) map { list =>
       DefaultSchemaNode(name = "$include",
         parameters = List.empty,
         source = sourceFromContext(ctx),
@@ -189,7 +103,7 @@ private[flexiconf] case class SchemaNodeVisitor(options: SchemaVisitorOptions,
     val name = ctx.directiveName.getText
     val source = sourceFromContext(ctx)
     val parameters = ParameterVisitor(ctx.parameterList())
-    val flags = DirectiveFlagListVisitor(ctx.flagList())
+    val flags = DirectiveFlagsVisitor(ctx.flagList())
     val docs = DocumentationVisitor(ctx.documentationBlock()).mkString("\n")
     val node = DefaultSchemaNode(name, parameters, sourceFromContext(ctx), flags, docs)
 

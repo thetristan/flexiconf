@@ -1,6 +1,8 @@
 package se.blea.flexiconf
 
 import org.scalatest.{FlatSpec, Matchers}
+import se.blea.flexiconf.argument.{StringArgument, DecimalArgument, IntArgument, BoolArgument}
+import se.blea.flexiconf.directive.{MaybeDirective, DirectiveDefinition}
 
 /** Test cases for Directive */
 class DirectiveSpec extends FlatSpec with Matchers {
