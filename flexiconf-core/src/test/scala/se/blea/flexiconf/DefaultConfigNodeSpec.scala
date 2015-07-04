@@ -1,6 +1,7 @@
 package se.blea.flexiconf
 
 import org.scalatest.{Matchers, FlatSpec}
+import se.blea.flexiconf.parser.ConfigNode
 
 /** Test cases for config parsing */
 class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
@@ -22,7 +23,7 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "identify whether the node is for a built-in directive" in {
     val node1 = node("foobar")
-    val node2 = node(DirectiveDefinition.root())
+    val node2 = node(BuiltInDirectives.root())
     val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
 
     assert(!node1.isInternalNode)
@@ -32,7 +33,7 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "identify whether the node is for a root directive" in {
     val node1 = node("foobar")
-    val node2 = node(DirectiveDefinition.root())
+    val node2 = node(BuiltInDirectives.root())
     val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
 
     assert(!node1.isRootNode)
@@ -42,7 +43,7 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "identify whether the node is for a user directive" in {
     val node1 = node("foobar")
-    val node2 = node(DirectiveDefinition.root())
+    val node2 = node(BuiltInDirectives.root())
     val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
 
     assert(node1.isUserNode)

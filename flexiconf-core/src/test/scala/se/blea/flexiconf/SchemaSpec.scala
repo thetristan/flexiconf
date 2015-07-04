@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream
 
 import org.antlr.v4.runtime.{CommonTokenStream, ANTLRInputStream}
 import org.scalatest.{Matchers, FlatSpec}
+import se.blea.flexiconf.parser.{SchemaVisitorOptions, SchemaVisitor}
 import se.blea.flexiconf.parser.gen.{SchemaParser, SchemaLexer}
 
 /** Test cases for Schema */

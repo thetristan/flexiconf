@@ -3,6 +3,7 @@ package se.blea.flexiconf.javaapi
 import org.scalatest.{FlatSpec, Matchers}
 import se.blea.flexiconf
 import se.blea.flexiconf._
+import se.blea.flexiconf.parser.ConfigNode
 
 class DirectiveSpec extends FlatSpec with Matchers {
   val arguments = List(

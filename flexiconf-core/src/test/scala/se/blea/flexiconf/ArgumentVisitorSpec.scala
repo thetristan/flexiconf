@@ -1,6 +1,7 @@
 package se.blea.flexiconf
 
 import org.scalatest.{Matchers, FlatSpec}
+import se.blea.flexiconf.parser.ArgumentVisitor
 
 /** Test cases for argument parsing */
 class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {

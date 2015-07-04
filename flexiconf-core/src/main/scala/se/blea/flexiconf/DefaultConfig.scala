@@ -1,5 +1,7 @@
 package se.blea.flexiconf
 
+import se.blea.flexiconf.parser.ConfigNode
+
 
 /** Container for a configuration tree */
 private[flexiconf] case class DefaultConfig(private val config: ConfigNode) extends Config {

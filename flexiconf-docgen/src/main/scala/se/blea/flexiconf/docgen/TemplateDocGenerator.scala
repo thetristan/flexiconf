@@ -4,22 +4,23 @@ import java.io.StringWriter
 import java.util
 
 import org.pegdown.PegDownProcessor
+import se.blea.flexiconf.parser.SchemaNode
 
 import scala.collection.JavaConversions._
 
 import com.github.mustachejava.DefaultMustacheFactory
-import se.blea.flexiconf.{Parameter, DirectiveFlags, DirectiveFlag, SchemaNode}
+import se.blea.flexiconf._
 
 
 class TemplateDocGenerator(templatePath: String) extends DocGenerator {
   lazy val processor = new PegDownProcessor()
   lazy val mf = new DefaultMustacheFactory()
 
-  private def presentNode(node: SchemaNode): java.util.Map[String, Any] = {
-    val name = node.name
-    val arity = node.parameters.size
-    val params = node.parameters.map(presentNodeParams).mkString(" ")
-    val blockFlag = if (node.children.nonEmpty) { "*" } else { "" }
+  private def presentNode(d: DirectiveDefinition): java.util.Map[String, Any] = {
+    val name = d.name
+    val arity = d.parameters.size
+    val params = d.parameters.map(presentNodeParams).mkString(" ")
+    val blockFlag = if (d.children.nonEmpty) { "*" } else { "" }
     val id = s"$name/$arity$blockFlag"
 
     Map(
@@ -27,18 +28,18 @@ class TemplateDocGenerator(templatePath: String) extends DocGenerator {
       "id" -> id,
       "arity" -> arity,
       "syntax" -> s"$name $params",
-      "notes" -> processor.markdownToHtml(node.documentation),
-      "flags" -> node.flags.map(_.documentation),
-      "directives" -> new util.ArrayList(node.children.map(presentNode))
+      "notes" -> processor.markdownToHtml(d.documentation),
+      "flags" -> d.flags.map(_.documentation),
+      "directives" -> new util.ArrayList(d.children.map(presentNode))
     )
   }
 
   private def presentNodeParams(param: Parameter) = s"${param.name}:${param.kind}"
 
-  override def process(node: SchemaNode): String = {
+  override def process(schema: Schema): String = {
     val w = new StringWriter()
     val ctx = new util.HashMap[String, Object](Map(
-      "directives" -> new util.ArrayList(node.children.map(presentNode))
+      "directives" -> new util.ArrayList(schema.directives.map(presentNode))
     ))
 
     mf.compile(templatePath).execute(w, ctx)

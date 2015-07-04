@@ -67,7 +67,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "return a group directive node for groups" in {
     val ctx = parse("group my_group { foo 123; }")
-    val root = node(DirectiveDefinition.root())
+    val root = node(BuiltInDirectives.root())
     val result = visitor(defaultOptions, makeStack(root)).visitDirective(ctx.directive())
 
     assert(result.get.name == "$group")

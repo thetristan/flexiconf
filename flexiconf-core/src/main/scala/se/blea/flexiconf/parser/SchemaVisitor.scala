@@ -1,16 +1,18 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
 import org.antlr.v4.runtime.ParserRuleContext
+import se.blea.flexiconf._
 import se.blea.flexiconf.parser.gen.SchemaParser._
 import se.blea.flexiconf.parser.gen.SchemaParserBaseVisitor
+import se.blea.flexiconf.util.{FileUtil, Stack}
 
 import scala.collection.JavaConversions._
 
 
 /** Visitor for parsing schemas */
-private[flexiconf] case class SchemaVisitor(options: SchemaVisitorOptions,
-                                             stack: Stack[DefaultSchemaNode] = Stack.empty,
-                                             visitorCtx: SchemaVisitorContext = SchemaVisitorContext())
+private[flexiconf] class SchemaVisitor(options: SchemaVisitorOptions,
+                                       stack: Stack[DefaultSchemaNode] = Stack.empty,
+                                       visitorCtx: SchemaVisitorContext = SchemaVisitorContext())
   extends SchemaParserBaseVisitor[Option[DefaultSchemaNode]] {
 
   /** Entry point for a schema file */
@@ -34,7 +36,7 @@ private[flexiconf] case class SchemaVisitor(options: SchemaVisitorOptions,
     Parser.streamFromSourceFile(includePath) flatMap { inputStream =>
       val parser = Parser.antlrSchemaParserFromStream(inputStream)
 
-      SchemaVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
+      new SchemaVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
         DefaultSchemaNode(name = "$include",
           parameters = List.empty,
           source = sourceFromContext(ctx),

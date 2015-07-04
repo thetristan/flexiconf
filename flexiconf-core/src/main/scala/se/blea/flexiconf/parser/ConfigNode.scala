@@ -1,5 +1,6 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
+import se.blea.flexiconf.{BuiltInDirectives, Argument, DirectiveDefinition, Source}
 
 /** Tree node containing a directive and arguments that satisfy it */
 private[flexiconf] case class ConfigNode(directive: DirectiveDefinition,
@@ -34,7 +35,7 @@ private[flexiconf] case class ConfigNode(directive: DirectiveDefinition,
   /** Collect all warnings for this tree */
   def warnings: List[String] = {
     children.flatMap { node =>
-      if (node.directive == DirectiveDefinition.warning) {
+      if (node.directive == BuiltInDirectives.warning) {
         val msg = node.arguments(0).value
         List(s"$msg at $source")
       } else {

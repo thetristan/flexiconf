@@ -1,4 +1,4 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
 import se.blea.flexiconf.parser.gen.SchemaParser.DirectiveListContext
 

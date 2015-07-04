@@ -2,13 +2,14 @@ package se.blea.flexiconf.javaapi
 
 import org.scalatest.{FlatSpec, Matchers}
 import se.blea.flexiconf
-import se.blea.flexiconf.{ConfigNode, DirectiveDefinition, Source}
+import se.blea.flexiconf.parser.ConfigNode
+import se.blea.flexiconf.{BuiltInDirectives, DirectiveDefinition, Source}
 
 class ConfigSpec extends FlatSpec with Matchers {
   val d1 = DirectiveDefinition.withName("foo").build
   val d2 = DirectiveDefinition.withName("bar").build
   val d3 = DirectiveDefinition.withName("baz").build
-  val root = DirectiveDefinition.root(d1, d2, d3)
+  val root = BuiltInDirectives.root(d1, d2, d3)
 
   val node1 = ConfigNode(d1, List.empty, Source("-", 0, 0))
   val node2 = ConfigNode(d2, List.empty, Source("-", 0, 0))

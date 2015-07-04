@@ -1,5 +1,7 @@
 package se.blea.flexiconf
 
+import se.blea.flexiconf.parser.ConfigNode
+
 /** Object that represents missing directives in the config **/
 private[flexiconf] object NullDirective {
   def apply(definition: DirectiveDefinition): DefaultDirective = {
@@ -12,7 +14,7 @@ private[flexiconf] object NullDirective {
 
 /** Helpers for working with directives */
 private[flexiconf] object DefaultDirective {
-   val unknown = new DefaultDirective(ConfigNode(DirectiveDefinition.unknown, List.empty, Source("unknown", 0, 0)))
+   val unknown = new DefaultDirective(ConfigNode(BuiltInDirectives.unknown, List.empty, Source("unknown", 0, 0)))
 
   /** Return a DefaultDirective given the provided name or path */
   def getDirective(directives: List[DefaultDirective], name: String): Option[DefaultDirective] = {

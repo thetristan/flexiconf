@@ -2,10 +2,9 @@ package se.blea.flexiconf
 
 
 /** Base trait for all directive flags */
-trait DirectiveFlag {
+sealed trait DirectiveFlag {
   def documentation: String
 }
-
 
 /** Flags that affect how directives should be handled when creating the final configuration tree */
 case class DirectiveFlags(flags: Set[DirectiveFlag] = Set.empty) {

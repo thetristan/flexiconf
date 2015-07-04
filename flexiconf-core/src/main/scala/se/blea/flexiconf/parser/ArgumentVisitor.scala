@@ -1,6 +1,7 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
 import org.antlr.v4.runtime.ParserRuleContext
+import se.blea.flexiconf._
 import se.blea.flexiconf.parser.gen.ConfigBaseVisitor
 import se.blea.flexiconf.parser.gen.ConfigParser._
 

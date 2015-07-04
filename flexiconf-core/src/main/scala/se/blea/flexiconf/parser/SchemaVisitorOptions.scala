@@ -1,5 +1,4 @@
-package se.blea.flexiconf
-
+package se.blea.flexiconf.parser
 
 /** Options for SchemaVisitors */
 case class SchemaVisitorOptions(sourceFile: String,

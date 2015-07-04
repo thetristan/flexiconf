@@ -1,5 +1,6 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
+import se.blea.flexiconf.DirectiveDefinition
 
 /** Options for the ConfigVisitor */
 private[flexiconf] case class ConfigVisitorOptions(sourceFile: String,

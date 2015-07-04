@@ -1,5 +1,6 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
+import se.blea.flexiconf.DirectiveDefinition
 import se.blea.flexiconf.parser.gen.ConfigParser.DirectiveListContext
 
 

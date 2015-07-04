@@ -4,6 +4,7 @@ import java.io.{FileNotFoundException, File, InputStream}
 
 import org.antlr.v4.runtime.{ANTLRInputStream, CommonTokenStream}
 import org.apache.commons.io.FileUtils
+import se.blea.flexiconf.parser.{SchemaVisitor, ConfigVisitor}
 import se.blea.flexiconf.parser.gen.{ConfigLexer, ConfigParser, SchemaLexer, SchemaParser}
 
 
@@ -37,7 +38,7 @@ object Parser {
     val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
     val parser = antlrConfigParserFromStream(stream.get)
 
-    ConfigVisitor(opts.visitorOpts)
+    new ConfigVisitor(opts.visitorOpts)
       .visit(parser.document)
       .map(DefaultConfig)
   }
@@ -71,9 +72,9 @@ object Parser {
     val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
     val parser = antlrSchemaParserFromStream(stream.get)
 
-    SchemaVisitor(opts.visitorOpts)
+    new SchemaVisitor(opts.visitorOpts)
       .visit(parser.document)
-      .map(Schema)
+      .map(s => Schema(s.name, s.source, s.toDirectives.filterNot(_.name.startsWith("$"))))
   }
 
   /** Parses and returns a schema with the default options **/

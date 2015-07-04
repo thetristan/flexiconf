@@ -1,5 +1,6 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
+import se.blea.flexiconf._
 
 /** Tree node that represents part of a schema */
 private[flexiconf] case class DefaultSchemaNode(name: String,

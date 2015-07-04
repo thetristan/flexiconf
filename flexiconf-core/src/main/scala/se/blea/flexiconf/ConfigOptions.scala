@@ -2,13 +2,12 @@ package se.blea.flexiconf
 
 import java.io.InputStream
 
+import se.blea.flexiconf.parser.ConfigVisitorOptions
+
 /** Options for configuration parsing */
 case class ConfigOptions private (private[flexiconf] val sourceFile: String = "",
                                   private[flexiconf] val inputStream: Option[InputStream] = None) {
-  private val missingSourceFile = sourceFile.isEmpty
-  private val missingInputStream = inputStream.isEmpty
-
-  if (missingSourceFile && missingInputStream) {
+  if (sourceFile.isEmpty && inputStream.isEmpty) {
     throw new IllegalStateException("A source file or valid input stream must be supplied")
   }
 
@@ -49,15 +48,15 @@ case class ConfigOptions private (private[flexiconf] val sourceFile: String = ""
     this
   }
 
-  def withSchema(s: Schema): ConfigOptions = {
-    visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ s.toDirectives)
+  def withSchema(s: Schema) = {
+    visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ s.directives)
     this
   }
 }
 
 object ConfigOptions {
-  def withSourceFile(sourceFile: String): ConfigOptions = ConfigOptions(sourceFile = sourceFile)
-  def withInputStream(streamName: String, inputStream: InputStream): ConfigOptions = ConfigOptions(inputStream = Option(inputStream))
+  def withSourceFile(sourceFile: String) = ConfigOptions(sourceFile)
+  def withInputStream(streamName: String, inputStream: InputStream) = ConfigOptions(streamName, Option(inputStream))
 }
 
 

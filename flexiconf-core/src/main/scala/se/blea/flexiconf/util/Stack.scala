@@ -1,5 +1,4 @@
-package se.blea.flexiconf
-
+package se.blea.flexiconf.util
 
 /** Container for the current node and all data associated with it */
 object Stack {

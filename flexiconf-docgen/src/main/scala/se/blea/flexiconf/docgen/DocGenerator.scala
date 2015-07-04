@@ -1,9 +1,9 @@
 package se.blea.flexiconf.docgen
 
-import se.blea.flexiconf.SchemaNode
+import se.blea.flexiconf.Schema
 
 trait DocGenerator {
-  def process(node: SchemaNode): String
+  def process(schema: Schema): String
 }
 
 

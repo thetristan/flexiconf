@@ -42,31 +42,6 @@ private[flexiconf] case class DirectiveDefinition private[flexiconf](name: Strin
 
 
 object DirectiveDefinition {
-  /** Indicates the start of the configuration tree */
-  private[flexiconf] def root(ds: Set[DirectiveDefinition] = Set.empty) =
-    new DirectiveDefinition(name = "$root", children = ds)
-
-  private[flexiconf] def root(ds: DirectiveDefinition*) =
-    new DirectiveDefinition(name = "$root", children = ds.toSet)
-
-  /** Allows inclusion of multiple, additional configuration trees */
-  private[flexiconf] def include(ds: Set[DirectiveDefinition]) =
-    new DirectiveDefinition(name = "$include", children = ds, parameters = List(Parameter("pattern")))
-
-  /** Defines a group of directives that can be used elsewhere in the configuration tree */
-  private[flexiconf] def group =
-    new DirectiveDefinition(name = "$group", parameters = List(Parameter("name")))
-
-  /** Includes directives from a pre-defined group in the configuration tree */
-  private[flexiconf] def use(ds: Set[DirectiveDefinition]) =
-    new DirectiveDefinition( name = "$use", children = ds, parameters = List(Parameter("pattern")))
-
-  /** Placeholder for errors encountered when parsing a configuration tree */
-  private[flexiconf] def warning =
-    new DirectiveDefinition(name = "$warning", parameters = List(Parameter("message")))
-
-  /** Placeholder for unknown directives when reading a configuration tree */
-  private[flexiconf] val unknown = new DirectiveDefinition(name = "unknown")
 
   /** Find the first matching directive given a list of allowed directives */
   private[flexiconf] def find(maybeDirective: MaybeDirective,

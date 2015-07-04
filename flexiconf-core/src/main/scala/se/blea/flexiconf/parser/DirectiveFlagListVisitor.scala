@@ -1,8 +1,9 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
 import org.antlr.v4.runtime.ParserRuleContext
 import se.blea.flexiconf.parser.gen.SchemaParser.{FlagAllowOnceContext, FlagContext, FlagListContext}
 import se.blea.flexiconf.parser.gen.SchemaParserBaseVisitor
+import se.blea.flexiconf.{DirectiveFlag, DirectiveFlags}
 
 import scala.collection.JavaConversions._
 

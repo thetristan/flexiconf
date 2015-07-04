@@ -1,5 +1,6 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
+import se.blea.flexiconf.{DirectiveDefinition, DirectiveFlag, Parameter, Source}
 
 trait SchemaNode {
   def name:String

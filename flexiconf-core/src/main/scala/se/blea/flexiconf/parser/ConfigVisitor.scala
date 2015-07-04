@@ -1,8 +1,10 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.parser
 
 import org.antlr.v4.runtime.ParserRuleContext
+import se.blea.flexiconf._
 import se.blea.flexiconf.parser.gen.ConfigBaseVisitor
 import se.blea.flexiconf.parser.gen.ConfigParser._
+import se.blea.flexiconf.util.{FileUtil, Stack}
 
 import scala.collection.JavaConversions._
 
@@ -12,9 +14,13 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
                                        stack: Stack[ConfigVisitorContext] = Stack.empty)
   extends ConfigBaseVisitor[Option[ConfigNode]] {
 
+  def this(options: ConfigVisitorOptions) = {
+    this(options, Stack.empty)
+  }
+
   /** Entry point for a configuration file */
   override def visitDocument(ctx: DocumentContext): Option[ConfigNode] = {
-    val root = stack.peek.map(_.node.directive) getOrElse DirectiveDefinition.root(options.directives)
+    val root = stack.peek.map(_.node.directive) getOrElse BuiltInDirectives.root(options.directives)
     val arguments = stack.peek.map(_.node.arguments).getOrElse(List.empty)
     val document = ConfigNode(root, arguments, sourceFromContext(ctx))
 
@@ -29,13 +35,13 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
     val currentPath = stack.peek.map(_.node.source.sourceFile).getOrElse("")
     val includePath = FileUtil.resolvePath(currentPath, includePattern).toString
     val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
-    val node = ConfigNode(DirectiveDefinition.include(allowedDirectives), ArgumentVisitor(ctx.stringArgument), sourceFromContext(ctx))
+    val node = ConfigNode(BuiltInDirectives.include(allowedDirectives), ArgumentVisitor(ctx.stringArgument), sourceFromContext(ctx))
 
     Parser.streamFromSourceFile(includePath) flatMap { inputStream =>
       val parser = Parser.antlrConfigParserFromStream(inputStream)
 
       stack.enterFrame(ConfigVisitorContext(node)) {
-        ConfigVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
+        new ConfigVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
           node.copy(arguments = List(Argument(includePath)), children = list.children)
         }
       }
@@ -44,7 +50,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
       val reason = s"File '$includePath' does not exist"
 
       if (options.allowMissingGroups) {
-        Some(node.copy(children = List(ConfigNode(DirectiveDefinition.warning, List(Argument(reason)), source))))
+        Some(node.copy(children = List(ConfigNode(BuiltInDirectives.warning, List(Argument(reason)), source))))
       } else {
         throw new IllegalStateException(s"$reason at $source")
       }
@@ -58,7 +64,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 
     addGroup(name, directives)
 
-    Some(ConfigNode(DirectiveDefinition.group,
+    Some(ConfigNode(BuiltInDirectives.group,
       ArgumentVisitor(ctx.stringArgument),
       sourceFromContext(ctx)))
   }
@@ -67,7 +73,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   override def visitUse(ctx: UseContext): Option[ConfigNode] = {
     val name = ctx.stringArgument.getText
     val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
-    val use = ConfigNode(DirectiveDefinition.use(allowedDirectives),
+    val use = ConfigNode(BuiltInDirectives.use(allowedDirectives),
       ArgumentVisitor(ctx.stringArgument),
       sourceFromContext(ctx))
 
@@ -78,7 +84,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
       val reason = s"Unknown group: $name"
 
       if (options.allowMissingGroups) {
-        Some(use.copy(children = List(ConfigNode(DirectiveDefinition.warning, List(Argument(reason)), source))))
+        Some(use.copy(children = List(ConfigNode(BuiltInDirectives.warning, List(Argument(reason)), source))))
       } else {
         throw new IllegalStateException(s"$reason at $source")
       }
@@ -107,7 +113,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
         val reason = s"Duplicate directive: $directive"
 
         if (options.allowDuplicateDirectives) {
-          return Some(ConfigNode(DirectiveDefinition.warning, List(Argument(reason)), source))
+          return Some(ConfigNode(BuiltInDirectives.warning, List(Argument(reason)), source))
         } else {
           throw new IllegalStateException(s"$reason at $source")
         }
@@ -124,7 +130,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
       val reason = s"Unknown directive: $maybeDirective"
 
       if (options.allowUnknownDirectives) {
-        Some(ConfigNode(DirectiveDefinition.warning, List(Argument(reason)), source))
+        Some(ConfigNode(BuiltInDirectives.warning, List(Argument(reason)), source))
       } else {
         throw new IllegalStateException(s"$reason at $source")
       }
@@ -166,12 +172,6 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 
   /** Returns a new Source object based on the provided context */
   def sourceFromContext(ctx: ParserRuleContext): Source = {
-    Source.fromContext(options.sourceFile, ctx)
+    Source(options.sourceFile, ctx.getStart.getLine, ctx.getStart.getCharPositionInLine)
   }
-}
-
-/** Companion for ConfigNodeVisitor */
-private[flexiconf] object ConfigVisitor {
-  def apply(opts: ConfigVisitorOptions,
-            stack: Stack[ConfigVisitorContext] = Stack.empty): ConfigVisitor = new ConfigVisitor(opts, stack)
 }
