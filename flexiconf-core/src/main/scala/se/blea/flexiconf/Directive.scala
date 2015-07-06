@@ -9,6 +9,9 @@ trait Directive extends TraversableConfig {
   /** Returns all args **/
   def args: List[Argument]
 
+  /** Returns where this directive was defined **/
+  def source: Option[Source]
+
   /** Return the first value */
   def apply: ArgumentValue
 

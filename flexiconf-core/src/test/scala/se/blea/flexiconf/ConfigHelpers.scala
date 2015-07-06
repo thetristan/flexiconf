@@ -11,9 +11,9 @@ import se.blea.flexiconf.util.Stack
 /** Helper methods for working with config parsers */
 trait ConfigHelpers {
   private[flexiconf] def defaultOptions = ConfigOptions.withSourceFile("test")
-  private[flexiconf] def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("", 0, 0))
-  private[flexiconf] def node(n: String): ConfigNode = node(DirectiveDefinition.withName(n).build)
-  private[flexiconf] def rootNode(ds: DirectiveDefinition*): ConfigNode = node(BuiltInDirectives.root(ds:_*))
+  private[flexiconf] def node(d: DefaultDefinition): ConfigNode = ConfigNode(d, List.empty, Source("", 0, 0))
+  private[flexiconf] def node(n: String): ConfigNode = node(DefaultDefinition.withName(n).build)
+  private[flexiconf] def rootNode(ds: DefaultDefinition*): ConfigNode = node(BuiltInDirectives.root(ds:_*))
   private[flexiconf] def makeStack(node: ConfigNode) = Stack(List(new ConfigVisitorContext(node)))
   private[flexiconf] def visitor(opts: ConfigOptions): ConfigVisitor = new ConfigVisitor(opts.visitorOpts)
   private[flexiconf] def visitor(opts: ConfigOptions, stack: Stack[ConfigVisitorContext]): ConfigVisitor = new ConfigVisitor(opts.visitorOpts, stack)

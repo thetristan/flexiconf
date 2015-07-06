@@ -101,7 +101,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
     val maybeDirective = MaybeDirective(name, arguments, hasBlock = Option(ctx.directiveList).nonEmpty)
 
     // Determine if the directive can be matched
-    DirectiveDefinition.find(maybeDirective, allowedDirectives) map { directive =>
+    DefaultDefinition.find(maybeDirective, allowedDirectives) map { directive =>
       val namedArguments = arguments.zip(directive.parameters) map { pair =>
         pair._1.copy(name = pair._2.name)
       }
@@ -152,7 +152,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   }
 
   /** Associate a directive with the closest, non-internal node or the root node */
-  def addDirective(directive: DirectiveDefinition): Unit = {
+  def addDirective(directive: DefaultDefinition): Unit = {
     stack.find(_.node.isUserNode) map { ctx =>
       stack.replace(ctx, ctx.withDirective(directive))
     }
@@ -166,7 +166,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   }
 
   /** Returns true if the directives associated with the nearest non-internal or root node */
-  def directiveAlreadyExists(directive: DirectiveDefinition): Boolean = {
+  def directiveAlreadyExists(directive: DefaultDefinition): Boolean = {
     stack.find(_.node.isUserNode).exists(_.directives.contains(directive))
   }
 

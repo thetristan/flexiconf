@@ -9,11 +9,11 @@ import scala.annotation.varargs
  * do not start with '$' so that they can be identified separately from built-in directives that
  * start with '$' (e.g. \$root, \$use, \$group, \$include).
  */
-private[flexiconf] case class DirectiveDefinition private[flexiconf](name: String,
-                                                                     parameters: List[Parameter] = List.empty,
-                                                                     flags: Set[DirectiveFlag] = Set.empty,
-                                                                     documentation: String = "",
-                                                                     children: Set[DirectiveDefinition] = Set.empty) {
+private[flexiconf] case class DefaultDefinition private[flexiconf](name: String,
+                                                                   parameters: List[Parameter] = List.empty,
+                                                                   flags: Set[DirectiveFlag] = Set.empty,
+                                                                   documentation: String = "",
+                                                                   children: Set[DefaultDefinition] = Set.empty) {
 
   /** True if this directive expects a block */
   private[flexiconf] val requiresBlock = children.nonEmpty
@@ -41,11 +41,11 @@ private[flexiconf] case class DirectiveDefinition private[flexiconf](name: Strin
 }
 
 
-object DirectiveDefinition {
+object DefaultDefinition {
 
   /** Find the first matching directive given a list of allowed directives */
   private[flexiconf] def find(maybeDirective: MaybeDirective,
-                              children: Set[DirectiveDefinition]): Option[DirectiveDefinition] = {
+                              children: Set[DefaultDefinition]): Option[DefaultDefinition] = {
     children.find(maybeDirective.matches)
   }
 
@@ -59,7 +59,7 @@ object DirectiveDefinition {
                                          parameters: List[Parameter] = List.empty,
                                          flags: Set[DirectiveFlag] = Set.empty,
                                          documentation: String = "",
-                                         children: Set[DirectiveDefinition] = Set.empty,
+                                         children: Set[DefaultDefinition] = Set.empty,
                                          allowInternal: Boolean = false) {
     if (name.isEmpty) {
       throw new IllegalArgumentException("Name cannot be empty")
@@ -113,12 +113,12 @@ object DirectiveDefinition {
 
     /** Allows one or more child directives within a block supplied to this directive */
     @varargs
-    def withDirectives(ds: DirectiveDefinition*): Builder = {
+    def withDirectives(ds: DefaultDefinition*): Builder = {
       copy(children = children ++ ds)
     }
 
     /** Returns new Directive with the previously defined options */
-    def build: DirectiveDefinition = DirectiveDefinition(name, parameters, flags, documentation, children)
+    def build: DefaultDefinition = DefaultDefinition(name, parameters, flags, documentation, children)
 
 
     // Private methods

@@ -8,14 +8,14 @@ class DirectiveSpec extends FlatSpec with Matchers {
   behavior of "MaybeDirective"
 
   it should "match a node by name" in {
-    val d = DirectiveDefinition.withName("test_node").build
+    val d = DefaultDefinition.withName("test_node").build
 
     assert(MaybeDirective("test_node") matches d)
     assert(MaybeDirective("node_test") doesNotMatch d)
   }
 
   it should "match a node by name and argument type" in {
-    val d = DirectiveDefinition.withName("test_node")
+    val d = DefaultDefinition.withName("test_node")
       .withStringArg("val1")
       .withDecimalArg("val2")
       .build
@@ -48,11 +48,11 @@ class DirectiveSpec extends FlatSpec with Matchers {
   }
 
   it should "match a node by name, args, and block allowance" in {
-    val d1 = DirectiveDefinition.withName("without_block")
+    val d1 = DefaultDefinition.withName("without_block")
       .withIntArg("val1")
       .build
 
-    val d2 = DirectiveDefinition.withName("with_block")
+    val d2 = DefaultDefinition.withName("with_block")
       .withBoolArg("val1")
       .withDirectives(d1)
       .build
@@ -67,11 +67,11 @@ class DirectiveSpec extends FlatSpec with Matchers {
   }
 
   it should "require a block with children directives" in {
-    val d1 = DirectiveDefinition.withName("without_block")
+    val d1 = DefaultDefinition.withName("without_block")
       .withIntArg("val1")
       .build
 
-    val d2 = DirectiveDefinition.withName("with_block")
+    val d2 = DefaultDefinition.withName("with_block")
       .withBoolArg("val1")
       .withDirectives(d1)
       .build

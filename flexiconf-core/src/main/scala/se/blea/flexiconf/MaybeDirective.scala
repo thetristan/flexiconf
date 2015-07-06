@@ -6,7 +6,7 @@ case class MaybeDirective(private[flexiconf] val name: String,
                           private[flexiconf] val hasBlock: Boolean = false) {
 
   /** Returns true if the provided provided Directive matches this MaybeDirective */
-  private[flexiconf] def matches(directive: DirectiveDefinition): Boolean = {
+  private[flexiconf] def matches(directive: DefaultDefinition): Boolean = {
     val argumentKinds = arguments map (_.kind)
     val parameterKinds = directive.parameters map (_.kind)
 
@@ -19,7 +19,7 @@ case class MaybeDirective(private[flexiconf] val name: String,
 
   /** Returns true if the provided Directive doesn't match this MaybeDirective */
 
-  private[flexiconf] def doesNotMatch(directive: DirectiveDefinition): Boolean = {
+  private[flexiconf] def doesNotMatch(directive: DefaultDefinition): Boolean = {
     !matches(directive)
   }
 

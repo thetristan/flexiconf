@@ -1,6 +1,6 @@
 package se.blea.flexiconf.parser
 
-import se.blea.flexiconf.DirectiveDefinition
+import se.blea.flexiconf.DefaultDefinition
 
 /** Options for the ConfigVisitor */
 private[flexiconf] case class ConfigVisitorOptions(sourceFile: String,
@@ -9,4 +9,4 @@ private[flexiconf] case class ConfigVisitorOptions(sourceFile: String,
                                                    allowMissingGroups: Boolean = false,
                                                    allowMissingIncludes: Boolean = false,
                                                    allowIncludeCycles: Boolean = false,
-                                                   directives: Set[DirectiveDefinition] = Set.empty)
+                                                   directives: Set[DefaultDefinition] = Set.empty)

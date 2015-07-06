@@ -38,12 +38,12 @@ case class ConfigOptions private (private[flexiconf] val sourceFile: String = ""
     this
   }
 
-  def withDirectives(ds: Set[DirectiveDefinition]): ConfigOptions = {
+  def withDirectives(ds: Set[DefaultDefinition]): ConfigOptions = {
     visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ ds)
     this
   }
 
-  def withDirectives(d: DirectiveDefinition*): ConfigOptions = {
+  def withDirectives(d: DefaultDefinition*): ConfigOptions = {
     visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ d)
     this
   }

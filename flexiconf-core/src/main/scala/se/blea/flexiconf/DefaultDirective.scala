@@ -1,99 +1,52 @@
 package se.blea.flexiconf
 
 import se.blea.flexiconf.parser.ConfigNode
+import se.blea.flexiconf.util.ExceptionUtil
 
-/** Object that represents missing directives in the config **/
+
+/** Object that represents missing, but valid directives in the config **/
 private[flexiconf] object NullDirective {
-  def apply(definition: DirectiveDefinition): DefaultDirective = {
-    val nullArgs = definition.parameters.map(_ => Argument("", UnknownArgument))
-    val nullNode = new ConfigNode(definition.copy(name = "unknown"), nullArgs, Source("-", 0, 0))
-    DefaultDirective(nullNode)
+  def apply(definition: DefaultDefinition) = {
+    DefaultDirective(definition.copy(name = "unknown"))
   }
 }
 
 
 /** Helpers for working with directives */
 private[flexiconf] object DefaultDirective {
-   val unknown = new DefaultDirective(ConfigNode(BuiltInDirectives.unknown, List.empty, Source("unknown", 0, 0)))
+  def directiveNotAllowed = ExceptionUtil.entityNotAllowed("Directive", "Directives", "not allowed in", "allowed")
+  def argumentNotAllowed = ExceptionUtil.entityNotAllowed("Argument", "Arguments", "not defined for", "defined")
 
-  /** Return a DefaultDirective given the provided name or path */
-  def getDirective(directives: List[DefaultDirective], name: String): Option[DefaultDirective] = {
-    directives.find(_.name == name)
+  implicit def configNode2DefaultDirective(node: ConfigNode): DefaultDirective = {
+    new DefaultDirective(node.directive, node.arguments, node.children.map(configNode2DefaultDirective), Some(node.source), node.warnings)
   }
-
-  /** Return all DefaultDirectives given a provided name */
-  def getDirectives(directives: List[DefaultDirective], name: String): List[DefaultDirective] = {
-    directives.filter(_.name == name)
-  }
-
-  /** Return an option containing the given argument value */
-  def getArg[T](d: DefaultDirective, argPath: String): Option[ArgumentValue] = {
-    d.args.find(_.name == argPath).map(_.value)
-  }
-
-  type IllegalStateExceptionGenerator = (String, Set[String], Set[String]) => Throwable
-
-  def entityNotAllowed(singular: String, plural: String, warning: String, complement: String): IllegalStateExceptionGenerator = {
-    (name: String, allowedDirectives: Set[String], illegalDirectives: Set[String]) => {
-      val illegal = illegalDirectives.mkString("', '")
-      val subject = if (illegalDirectives.size > 1) plural else singular
-
-      val allowedMessage = if (allowedDirectives.size > 0) {
-        val allowed = allowedDirectives.mkString("', '")
-        val verb = if (allowedDirectives.size > 1) "are" else "is"
-        s": only '$allowed' $verb $complement"
-      } else {
-        ""
-      }
-
-      new IllegalStateException(s"$subject '$illegal' $warning $name" ++ allowedMessage)
-    }
-  }
-
-  def directiveNotAllowed: IllegalStateExceptionGenerator = entityNotAllowed("Directive", "Directives", "not allowed in", "allowed")
-  def argumentNotAllowed: IllegalStateExceptionGenerator = entityNotAllowed("Argument", "Arguments", "not defined for", "defined")
 }
 
+
 /** Default implementation of a directive */
-private[flexiconf] case class DefaultDirective(private val node: ConfigNode) extends Directive {
-  import DefaultDirective._
+private[flexiconf] case class DefaultDirective(definition: DefaultDefinition,
+                                               args: List[Argument] = List.empty,
+                                               directives: List[DefaultDirective] = List.empty,
+                                               source: Option[Source] = None,
+                                               private val _warnings: List[String] = List.empty) extends Directive {
+  import se.blea.flexiconf.DefaultDirective._
 
-  private lazy val _directives = node.children.map(new DefaultDirective(_))
-  private lazy val allowedDirectives = node.allowedDirectives.map(_.name)
-  private lazy val allowedArguments = node.allowedArguments.map(_.name).toSet
+  // Private
 
-  override def name: String = node.name
+  private def allowedDirectives = definition.children.map(_.name)
+  private def allowedArguments = definition.parameters.map(_.name).toSet
 
-  override def args: List[Argument] = node.arguments
+  // Public
+
+  // Directive implementation
+
+  override def name: String = definition.name
 
   override def contains(name: String): Boolean = directives.exists(_.name == name)
   override def containsArg(name: String): Boolean = args.exists(_.name == name)
 
   override def allows(name: String): Boolean = allowedDirectives.contains(name)
   override def allowsArg(name: String): Boolean = allowedArguments.contains(name)
-
-  override def directive(name: String): Directive = {
-    if (allowedDirectives.contains(name)) {
-      getDirective(_directives, name) getOrElse {
-        NullDirective(node.directive.children.find(_.name == name).get)
-      }
-    } else {
-      throw directiveNotAllowed(this.name, allowedDirectives, Set(name))
-    }
-  }
-
-  override def directives: List[Directive] = _directives
-
-  override def directives(names: String*): List[Directive] = {
-    val missing = names.toSet &~ allowedDirectives
-    if (missing.size == 0) {
-      names.flatMap(getDirectives(_directives, _)).toList
-    } else {
-      throw directiveNotAllowed(this.name, allowedDirectives, missing)
-    }
-  }
-
-  override def warnings: List[String] = node.warnings
 
   override def apply: ArgumentValue = argValue(0)
 
@@ -103,9 +56,28 @@ private[flexiconf] case class DefaultDirective(private val node: ConfigNode) ext
 
   override def argValue(name: String): ArgumentValue = {
     if (allowedArguments.contains(name)) {
-      getArg(this, name).getOrElse(NullValue)
+      args.find(_.name == name).map(_.value).getOrElse(NullValue)
     } else {
       throw argumentNotAllowed(this.name, allowedArguments, Set(name))
     }
   }
+
+  override def directive(name: String): Directive = {
+    if (allowedDirectives.contains(name)) {
+      directives.find(_.name == name) getOrElse NullDirective(definition.children.find(_.name == name).get)
+    } else {
+      throw directiveNotAllowed(this.name, allowedDirectives, Set(name))
+    }
+  }
+
+  override def directives(names: String*): List[Directive] = {
+    val missing = names.toSet &~ allowedDirectives
+    if (missing.size == 0) {
+      names.flatMap(name => directives.filter(_.name == name)).toList
+    } else {
+      throw directiveNotAllowed(this.name, allowedDirectives, missing)
+    }
+  }
+
+  override def warnings: List[String] = _warnings ++ directives.flatMap(_.warnings)
 }

@@ -8,7 +8,7 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "prevent mismatching arguments for parameters" in {
     intercept[IllegalStateException] {
-      val d = DirectiveDefinition.withName("foo")
+      val d = DefaultDefinition.withName("foo")
         .withIntArg("val")
         .withIntArg("bar")
         .build
@@ -24,7 +24,7 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
   it should "identify whether the node is for a built-in directive" in {
     val node1 = node("foobar")
     val node2 = node(BuiltInDirectives.root())
-    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
+    val node3 = node(DefaultDefinition.withUnsafeName("$foo").build)
 
     assert(!node1.isInternalNode)
     assert(node2.isInternalNode)
@@ -34,7 +34,7 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
   it should "identify whether the node is for a root directive" in {
     val node1 = node("foobar")
     val node2 = node(BuiltInDirectives.root())
-    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
+    val node3 = node(DefaultDefinition.withUnsafeName("$foo").build)
 
     assert(!node1.isRootNode)
     assert(node2.isRootNode)
@@ -44,7 +44,7 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
   it should "identify whether the node is for a user directive" in {
     val node1 = node("foobar")
     val node2 = node(BuiltInDirectives.root())
-    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
+    val node3 = node(DefaultDefinition.withUnsafeName("$foo").build)
 
     assert(node1.isUserNode)
     assert(node2.isUserNode)

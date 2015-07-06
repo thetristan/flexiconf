@@ -8,7 +8,7 @@ private[flexiconf] case class DefaultSchemaNode(name: String,
                                                 source: Source,
                                                 flags: Set[DirectiveFlag] = Set.empty,
                                                 documentation: String = "",
-                                                children: List[DefaultSchemaNode] = List.empty) extends SchemaNode {
+                                                children: List[DefaultSchemaNode] = List.empty) extends Definition {
 
   // Parameter validation
 
@@ -25,7 +25,7 @@ private[flexiconf] case class DefaultSchemaNode(name: String,
     }
   }
 
-  override def toDirectives: Set[DirectiveDefinition] = {
+  override def toDirectives: Set[DefaultDefinition] = {
     children.map(_.toDirective).toSet
   }
 
@@ -41,8 +41,8 @@ private[flexiconf] case class DefaultSchemaNode(name: String,
   }
 
   /** Convert this SchemaNode to a tree of directives */
-  def toDirective: DirectiveDefinition = {
-    DirectiveDefinition.withUnsafeName(name)
+  def toDirective: DefaultDefinition = {
+    DefaultDefinition.withUnsafeName(name)
       .withParameters(parameters)
       .withFlags(flags)
       .withDocumentation(documentation)

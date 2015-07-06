@@ -1,9 +1,9 @@
 package se.blea.flexiconf.parser
 
-import se.blea.flexiconf.{BuiltInDirectives, Argument, DirectiveDefinition, Source}
+import se.blea.flexiconf.{BuiltInDirectives, Argument, DefaultDefinition, Source}
 
 /** Tree node containing a directive and arguments that satisfy it */
-private[flexiconf] case class ConfigNode(directive: DirectiveDefinition,
+private[flexiconf] case class ConfigNode(directive: DefaultDefinition,
                                          arguments: List[Argument],
                                          source: Source,
                                          children: List[ConfigNode] = List.empty) {
@@ -32,17 +32,9 @@ private[flexiconf] case class ConfigNode(directive: DirectiveDefinition,
     * so directives and groups at the top-most level of the configuration can be associated with a node */
   val isUserNode = !isInternalNode || isRootNode
 
-  /** Collect all warnings for this tree */
-  def warnings: List[String] = {
-    children.flatMap { node =>
-      if (node.directive == BuiltInDirectives.warning) {
-        val msg = node.arguments(0).value
-        List(s"$msg at $source")
-      } else {
-        node.warnings
-      }
-    }
-  }
+  /** Collect all warnings for this node */
+  val warnings: List[String] = children.filter(_.directive == BuiltInDirectives.warning)
+      .map(node => s"${node.arguments(0).value} at $source")
 
   /** Collapse the tree and remove all internal nodes */
   def collapse: ConfigNode = {

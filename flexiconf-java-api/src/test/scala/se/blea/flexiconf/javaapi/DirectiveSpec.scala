@@ -15,13 +15,13 @@ class DirectiveSpec extends FlatSpec with Matchers {
     flexiconf.Argument("15m", DurationArgument, "duration")
   )
 
-  val d1 = DirectiveDefinition.withName("foo").build
-  val d2 = DirectiveDefinition.withName("bar").build
-  val d3 = DirectiveDefinition.withName("baz")
+  val d1 = DefaultDefinition.withName("foo").build
+  val d2 = DefaultDefinition.withName("bar").build
+  val d3 = DefaultDefinition.withName("baz")
     .withStringArg("arg1")
     .build
 
-  val root = DirectiveDefinition.withName("directive")
+  val root = DefaultDefinition.withName("directive")
     .withStringArg("string")
     .withIntArg("int")
     .withBoolArg("boolean")
@@ -31,14 +31,7 @@ class DirectiveSpec extends FlatSpec with Matchers {
     .withDirectives(d1, d2, d3)
     .build
 
-  val node1 = ConfigNode(d1, List.empty, Source("-", 0, 0))
-  val node2 = ConfigNode(d2, List.empty, Source("-", 0, 0))
-
-  val rootNode = ConfigNode(root, arguments, Source("-", 0, 0))
-    .copy(children = List(node1, node2))
-
-  val directive = new Directive(new DefaultDirective(rootNode))
-
+  val directive = new Directive(DefaultDirective(root, arguments, List(DefaultDirective(d1), DefaultDirective(d2))))
 
   behavior of "getName"
 

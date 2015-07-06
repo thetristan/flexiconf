@@ -3,12 +3,12 @@ package se.blea.flexiconf.javaapi
 import org.scalatest.{FlatSpec, Matchers}
 import se.blea.flexiconf
 import se.blea.flexiconf.parser.ConfigNode
-import se.blea.flexiconf.{BuiltInDirectives, DirectiveDefinition, Source}
+import se.blea.flexiconf.{BuiltInDirectives, DefaultDefinition, Source}
 
 class ConfigSpec extends FlatSpec with Matchers {
-  val d1 = DirectiveDefinition.withName("foo").build
-  val d2 = DirectiveDefinition.withName("bar").build
-  val d3 = DirectiveDefinition.withName("baz").build
+  val d1 = DefaultDefinition.withName("foo").build
+  val d2 = DefaultDefinition.withName("bar").build
+  val d3 = DefaultDefinition.withName("baz").build
   val root = BuiltInDirectives.root(d1, d2, d3)
 
   val node1 = ConfigNode(d1, List.empty, Source("-", 0, 0))

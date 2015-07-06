@@ -6,18 +6,18 @@ import org.scalatest.{Matchers, FlatSpec}
 class DirectiveBuilderSpec extends FlatSpec with Matchers {
   it should "disallow empty names" in {
     intercept[IllegalArgumentException] {
-      DirectiveDefinition.withName("")
+      DefaultDefinition.withName("")
     }
   }
 
   it should "disallow names starting with $" in {
     intercept[IllegalArgumentException] {
-      DirectiveDefinition.withName("$")
+      DefaultDefinition.withName("$")
     }
   }
 
   it should "create a new copy when provided an argument" in {
-    val d1 = DirectiveDefinition.withName("foo")
+    val d1 = DefaultDefinition.withName("foo")
     val d2 = d1.withBoolArg("arg1")
 
     assert(d1 != d2)
@@ -26,7 +26,7 @@ class DirectiveBuilderSpec extends FlatSpec with Matchers {
   }
 
   it should "create a new copy when provided a directive" in {
-    val d1 = DirectiveDefinition.withName("foo")
+    val d1 = DefaultDefinition.withName("foo")
     val dir = d1.build
     val d2 = d1.withDirectives(dir)
 
@@ -36,42 +36,42 @@ class DirectiveBuilderSpec extends FlatSpec with Matchers {
   }
 
   it should "allow adding int args" in {
-    val d = DirectiveDefinition.withName("foo").withIntArg("val").build
+    val d = DefaultDefinition.withName("foo").withIntArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == IntArgument)
   }
 
   it should "allow adding bool args" in {
-    val d = DirectiveDefinition.withName("foo").withBoolArg("val").build
+    val d = DefaultDefinition.withName("foo").withBoolArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == BoolArgument)
   }
 
   it should "allow adding string args" in {
-    val d = DirectiveDefinition.withName("foo").withStringArg("val").build
+    val d = DefaultDefinition.withName("foo").withStringArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == StringArgument)
   }
 
   it should "allow adding decimal args" in {
-    val d = DirectiveDefinition.withName("foo").withDecimalArg("val").build
+    val d = DefaultDefinition.withName("foo").withDecimalArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == DecimalArgument)
   }
 
   it should "allow a directive to repeat by default" in {
-    val d = DirectiveDefinition.withName("foo").build
+    val d = DefaultDefinition.withName("foo").build
     assert(!d.allowOnce)
   }
 
   it should "allow a directive to not be repeated if only allowed once" in {
-    val d = DirectiveDefinition.withName("foo").allowOnce().build
+    val d = DefaultDefinition.withName("foo").allowOnce().build
     assert(d.allowOnce)
   }
 
   it should "disallow arguments with empty names" in {
     intercept[IllegalArgumentException] {
-      DirectiveDefinition.withName("foo").withIntArg("")
+      DefaultDefinition.withName("foo").withIntArg("")
     }
   }
 }

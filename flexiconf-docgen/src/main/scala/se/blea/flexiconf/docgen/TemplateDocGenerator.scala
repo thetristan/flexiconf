@@ -4,7 +4,7 @@ import java.io.StringWriter
 import java.util
 
 import org.pegdown.PegDownProcessor
-import se.blea.flexiconf.parser.SchemaNode
+import se.blea.flexiconf.parser.Definition
 
 import scala.collection.JavaConversions._
 
@@ -16,7 +16,7 @@ class TemplateDocGenerator(templatePath: String) extends DocGenerator {
   lazy val processor = new PegDownProcessor()
   lazy val mf = new DefaultMustacheFactory()
 
-  private def presentNode(d: DirectiveDefinition): java.util.Map[String, Any] = {
+  private def presentNode(d: DefaultDefinition): java.util.Map[String, Any] = {
     val name = d.name
     val arity = d.parameters.size
     val params = d.parameters.map(presentNodeParams).mkString(" ")
