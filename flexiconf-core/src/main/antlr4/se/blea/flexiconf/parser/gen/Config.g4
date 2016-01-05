@@ -17,6 +17,9 @@ directive
  | userDirective
  ;
 
+userBlock
+ :
+ ;
 userDirective
  : directiveName argumentList? ( LBRACE directiveList RBRACE | SEMI )
  ;

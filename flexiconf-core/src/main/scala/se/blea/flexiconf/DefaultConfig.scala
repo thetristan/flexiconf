@@ -1,40 +1,51 @@
 package se.blea.flexiconf
 
+import se.blea.flexiconf.parser._
+
 
 /** Container for a configuration tree */
-private[flexiconf] case class DefaultConfig(private val config: ConfigNode) extends Config {
-  import DefaultDirective._
+case class DefaultConfig(directives: List[Directive],
+                         private val allowedDirectives: Set[Definition]) extends Config {
 
-  private lazy val collapsedConfig = config.collapse
-  private lazy val collapsedDirectives = collapsedConfig.children.map(new DefaultDirective(_))
-  private lazy val allowedDirectives = collapsedConfig.allowedDirectives.map(_.name)
+  private lazy val allowedDirectivesByName = allowedDirectives.map(dd => dd.name -> dd).toMap
 
-  override def renderTree: String = collapsedConfig.children.map(_.renderTree()).mkString("")
-  override private[flexiconf] def renderDebugTree = config.children.map(_.renderTree()).mkString("")
-
-  override def warnings: List[String] = config.warnings
-
-  override def directive(name: String): Directive = {
-    if (allowedDirectives.contains(name)) {
-      getDirective(collapsedDirectives, name) getOrElse {
-        NullDirective(config.directive.children.find(_.name == name).get)
-      }
-    } else {
-      throw directiveNotAllowed("top-level of config", allowedDirectives, Set(name))
-    }
-  }
-
-  override def directives: List[Directive] = collapsedDirectives
-
-  override def directives(names: String*): List[Directive] = {
-    val missing = names.toSet &~ allowedDirectives
-    if (missing.size == 0) {
-      names.flatMap(getDirectives(collapsedDirectives, _)).toList
-    } else {
-      throw directiveNotAllowed("top-level of config", allowedDirectives, missing)
-    }
-  }
+  // TraversableConfig implementation
 
   override def contains(name: String): Boolean = directives.exists(_.name == name)
-  override def allows(name: String): Boolean = allowedDirectives.contains(name)
+
+  override def allows(name: String): Boolean = allowedDirectivesByName.contains(name)
+
+  override def directive(name: String): Directive = {
+    import se.blea.flexiconf.DefaultDirective._
+
+    allowedDirectivesByName.get(name) map { dd =>
+      directives.find(_.name == name) getOrElse NullDirective(dd)
+    } getOrElse {
+      throw directiveNotAllowed("top-level of config", allowedDirectivesByName.keySet, Set(name))
+    }
+  }
+
+  override def directives(names: String*): List[Directive] = {
+    import se.blea.flexiconf.DefaultDirective._
+
+    val missing = names.toSet &~ allowedDirectivesByName.keySet
+    if (missing.isEmpty) {
+      names.flatMap(name => directives.filter(_.name == name)).toList
+    } else {
+      throw directiveNotAllowed("top-level of config", allowedDirectivesByName.keySet, missing)
+    }
+  }
+
+  override def warnings: List[String] = directives.flatMap(_.warnings)
+}
+
+object DefaultConfig {
+  def fromNode(node: Node, schema: Schema): DefaultConfig = {
+    val directives: List[Directive] = node match {
+      case TreeNode(t) => t.nodes.map(n => n.flatMap(DefaultDirective.fromNode(_, schema.definitions))).getOrElse(Nil)
+      case _ => Nil
+    }
+
+    DefaultConfig(directives, schema.definitions)
+  }
 }

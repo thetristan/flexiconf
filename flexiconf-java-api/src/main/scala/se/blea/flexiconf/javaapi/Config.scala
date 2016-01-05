@@ -1,23 +1,27 @@
 package se.blea.flexiconf.javaapi
 
+import java.lang.{Boolean => JBoolean, String => JString}
+import java.util.{List => JList}
+
 import scala.collection.JavaConversions._
 
 
 /** Java-friendly wrapper for the Config API */
 class Config(private val _config: se.blea.flexiconf.Config) {
-  def getDirectives: java.util.List[Directive] = _config.directives.map(new Directive(_))
+  import se.blea.flexiconf.helpers.RenderHelpers._
 
+  def getDirectives: JList[Directive] = _config.directives.map(new Directive(_))
 
-  def contains(name: String): java.lang.Boolean = _config.contains(name)
+  def contains(name: String): JBoolean = _config.contains(name)
 
   @annotation.varargs
-  def getDirectives(names: String*): java.util.List[Directive] = _config.directives
+  def getDirectives(names: String*): JList[Directive] = _config.directives
     .filter( d => names.contains(d.name) )
     .map(new Directive(_))
 
   def getDirective(name: String): Directive = new Directive(_config.directive(name))
 
-  def getWarnings: java.util.List[String] = _config.warnings
+  def getWarnings: JList[String] = _config.warnings
 
-  def renderTree: String = _config.renderTree
+  def renderTree: JString = _config.renderTree()
 }

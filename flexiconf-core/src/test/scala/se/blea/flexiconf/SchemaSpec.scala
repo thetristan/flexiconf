@@ -2,9 +2,11 @@ package se.blea.flexiconf
 
 import java.io.ByteArrayInputStream
 
-import org.antlr.v4.runtime.{CommonTokenStream, ANTLRInputStream}
-import org.scalatest.{Matchers, FlatSpec}
-import se.blea.flexiconf.parser.gen.{SchemaParser, SchemaLexer}
+import org.antlr.v4.runtime.{ANTLRInputStream, CommonTokenStream}
+import org.apache.commons.io.input.NullInputStream
+import org.scalatest.{FlatSpec, Matchers}
+import se.blea.flexiconf.parser.gen.{SchemaLexer, SchemaParser}
+import se.blea.flexiconf.parser.{RootNode, SchemaVisitor}
 
 /** Test cases for Schema */
 class SchemaSpec extends FlatSpec with Matchers {
@@ -15,13 +17,10 @@ class SchemaSpec extends FlatSpec with Matchers {
     val tokens = new CommonTokenStream(lexer)
     val parser = new SchemaParser(tokens)
     val document = parser.document()
-
-    val opts = SchemaVisitorOptions("test")
-    val visitor = new SchemaVisitor(opts)
+    val visitor = new SchemaVisitor("test")
 
     visitor.visitDocument(document)
   }
-
 
   behavior of "#visitDocument"
 
@@ -34,23 +33,14 @@ class SchemaSpec extends FlatSpec with Matchers {
         |qux val:Bool;
       """.stripMargin)
 
-    assert(result.get.name === "$root")
+    assert(result.isInstanceOf[RootNode])
 
-    val children = result.get.children
-    assert(children(0).name === "foo")
-    assert(children(0).parameters(0).name === "val")
-    assert(children(0).parameters(0).kind === IntArgument)
-
-    assert(children(1).name === "bar")
-    assert(children(1).parameters(0).name === "val")
-    assert(children(1).parameters(0).kind === StringArgument)
-
-    assert(children(2).name === "baz")
-    assert(children(2).parameters(0).name === "val")
-    assert(children(2).parameters(0).kind === DecimalArgument)
-
-    assert(children(3).name === "qux")
-    assert(children(3).parameters(0).name === "val")
-    assert(children(3).parameters(0).kind === BoolArgument)
+    // scalastyle:off magic.number
+//    result.get.definitions shouldEqual Set(
+//      DefaultDefinition(name = "foo", source = Some(Source("test", 2, 0)), parameters = List(Parameter("val", IntArgument))),
+//      DefaultDefinition(name = "bar", source = Some(Source("test", 3, 0)), parameters = List(Parameter("val", StringArgument))),
+//      DefaultDefinition(name = "baz", source = Some(Source("test", 4, 0)), flags = Set(AllowOnce), parameters = List(Parameter("val", DecimalArgument))),
+//      DefaultDefinition(name = "qux", source = Some(Source("test", 5, 0)), parameters = List(Parameter("val", BoolArgument))))
+    // scalastyle:on magic.number
   }
 }

@@ -10,7 +10,7 @@ class ReadmeExampleSpec extends FlatSpec with Matchers {
   case class Server(address: String, port: Int, virtualServers: List[VirtualServer])
 
   it should "work flawlessly with the example in the readme" in {
-    Parser.parseConfig(Configs.README, Schemas.README) map { config =>
+    Parser.parse(Configs.README, Schemas.README) map { config =>
       val server = config \ "server"
       val (address, port) = server % ("address", "port")
 

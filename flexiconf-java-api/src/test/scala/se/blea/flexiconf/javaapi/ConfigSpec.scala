@@ -2,21 +2,21 @@ package se.blea.flexiconf.javaapi
 
 import org.scalatest.{FlatSpec, Matchers}
 import se.blea.flexiconf
-import se.blea.flexiconf.{ConfigNode, DirectiveDefinition, Source}
+import se.blea.flexiconf.{DefaultDefinition, DefaultDirective}
 
 class ConfigSpec extends FlatSpec with Matchers {
-  val d1 = DirectiveDefinition.withName("foo").build
-  val d2 = DirectiveDefinition.withName("bar").build
-  val d3 = DirectiveDefinition.withName("baz").build
-  val root = DirectiveDefinition.root(d1, d2, d3)
+  val dd1 = DefaultDefinition("foo")
+  val dd2 = DefaultDefinition("bar")
+  val dd3 = DefaultDefinition("baz")
 
-  val node1 = ConfigNode(d1, List.empty, Source("-", 0, 0))
-  val node2 = ConfigNode(d2, List.empty, Source("-", 0, 0))
-  val node3 = ConfigNode(d3, List.empty, Source("-", 0, 0))
-  val rootNode = ConfigNode(root, List.empty, Source("-", 0, 0))
-    .copy(children = List(node1, node2, node3))
+  val d1 = DefaultDirective(dd1, Nil, Nil, None, Nil)
+  val d2 = DefaultDirective(dd2, Nil, Nil, None, Nil)
+  val d3 = DefaultDirective(dd3, Nil, Nil, None, Nil)
 
-  val config = new Config(new flexiconf.DefaultConfig(rootNode))
+
+  val rawConfig = new flexiconf.DefaultConfig(List(d1, d2, d3), Set(dd1, dd2, dd3))
+
+  val config = new Config(rawConfig)
 
   behavior of "hasDirective"
 

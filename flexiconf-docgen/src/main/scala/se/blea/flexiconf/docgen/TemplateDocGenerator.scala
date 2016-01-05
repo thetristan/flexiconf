@@ -8,18 +8,18 @@ import org.pegdown.PegDownProcessor
 import scala.collection.JavaConversions._
 
 import com.github.mustachejava.DefaultMustacheFactory
-import se.blea.flexiconf.{Parameter, DirectiveFlags, DirectiveFlag, SchemaNode}
+import se.blea.flexiconf._
 
 
 class TemplateDocGenerator(templatePath: String) extends DocGenerator {
   lazy val processor = new PegDownProcessor()
   lazy val mf = new DefaultMustacheFactory()
 
-  private def presentNode(node: SchemaNode): java.util.Map[String, Any] = {
-    val name = node.name
-    val arity = node.parameters.size
-    val params = node.parameters.map(presentNodeParams).mkString(" ")
-    val blockFlag = if (node.children.nonEmpty) { "*" } else { "" }
+  private def presentNode(d: Definition): java.util.Map[String, Any] = {
+    val name = d.name
+    val arity = d.params.size
+    val params = d.params.map(presentNodeParams).mkString(" ")
+    val blockFlag = if (d.definitions.nonEmpty) { "*" } else { "" }
     val id = s"$name/$arity$blockFlag"
 
     Map(
@@ -27,18 +27,18 @@ class TemplateDocGenerator(templatePath: String) extends DocGenerator {
       "id" -> id,
       "arity" -> arity,
       "syntax" -> s"$name $params",
-      "notes" -> processor.markdownToHtml(node.documentation),
-      "flags" -> node.flags.map(_.documentation),
-      "directives" -> new util.ArrayList(node.children.map(presentNode))
+      "notes" -> processor.markdownToHtml(d.documentation),
+      "flags" -> d.flags.map(_.documentation),
+      "directives" -> new util.ArrayList(d.definitions.map(presentNode))
     )
   }
 
-  private def presentNodeParams(param: Parameter) = s"${param.name}:${param.kind}"
+  private def presentNodeParams(param: Param) = s"${param.name}:${param.kind}"
 
-  override def process(node: SchemaNode): String = {
+  override def process(schema: Schema): String = {
     val w = new StringWriter()
     val ctx = new util.HashMap[String, Object](Map(
-      "directives" -> new util.ArrayList(node.children.map(presentNode))
+      "directives" -> new util.ArrayList(schema.definitions.map(presentNode))
     ))
 
     mf.compile(templatePath).execute(w, ctx)

@@ -10,6 +10,7 @@ object CLI {
 
   val actions = List(
     InspectAction,
+    InspectSchemaAction,
     ValidateAction,
     GenerateDocsAction,
     DebugAction

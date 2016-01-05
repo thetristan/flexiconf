@@ -1,20 +1,22 @@
 package se.blea.flexiconf.javaapi
 
-import scala.collection.JavaConversions._
+import java.lang.{Boolean => JBoolean, Double => JDouble, Long => JLong, String => JString}
+import java.util.{List => JList}
 
+import scala.collection.JavaConversions._
 
 /** Java-friendly wrapper for the ConfigNode API */
 class Directive(private val _directive: se.blea.flexiconf.Directive) {
-  def getName: String = _directive.name
+  def getName: JString = _directive.name
 
-  def getArgs: java.util.List[Argument] = _directive.args.map(new Argument(_))
+  def getArgs: JList[Argument] = _directive.args.map { case (name, arg) => new Argument(name, arg) }.toList
 
-  def getDirectives: java.util.List[Directive] = _directive.directives.map(new Directive(_))
+  def getDirectives: JList[Directive] = _directive.directives.map(new Directive(_))
 
-  def contains(name: String): java.lang.Boolean = _directive.contains(name)
+  def contains(name: String): JBoolean = _directive.contains(name)
 
   @annotation.varargs
-  def getDirectives(names: String*): java.util.List[Directive] = _directive.directives(names:_*).map(new Directive(_))
+  def getDirectives(names: String*): JList[Directive] = _directive.directives(names:_*).map(new Directive(_))
 
   def getDirective(name: String): Directive = new Directive(_directive.directive(name))
 
@@ -23,23 +25,23 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
   private def doubleArg(name: String): Option[Double] = _directive.argValue(name).doubleValue
   private def stringArg(name: String): Option[String] = _directive.argValue(name).stringValue
 
-  def hasArg(name: String): java.lang.Boolean = _directive.allowsArg(name)
+  def hasArg(name: String): JBoolean = _directive.allowsArg(name)
 
-  def getBoolArg(name: String): java.lang.Boolean = boolArg(name).getOrElse[Boolean](false)
-  def getBoolArg(name: String, default: java.lang.Boolean): java.lang.Boolean = boolArg(name).getOrElse[Boolean](default)
+  def getBoolArg(name: String): JBoolean = boolArg(name).getOrElse[Boolean](false)
+  def getBoolArg(name: String, default: JBoolean): JBoolean = boolArg(name).getOrElse[Boolean](default)
 
-  def getPercentageArg(name: String): java.lang.Double = doubleArg(name).getOrElse[Double](0.0)
-  def getPercentageArg(name: String, default: java.lang.Double): java.lang.Double = doubleArg(name).getOrElse[Double](default)
+  def getPercentageArg(name: String): JDouble = doubleArg(name).getOrElse[Double](0.0)
+  def getPercentageArg(name: String, default: JDouble): JDouble = doubleArg(name).getOrElse[Double](default)
 
-  def getDecimalArg(name: String): java.lang.Double = doubleArg(name).getOrElse[Double](0.0)
-  def getDecimalArg(name: String, default: java.lang.Double): java.lang.Double = doubleArg(name).getOrElse[Double](default)
+  def getDecimalArg(name: String): JDouble = doubleArg(name).getOrElse[Double](0.0)
+  def getDecimalArg(name: String, default: JDouble): JDouble = doubleArg(name).getOrElse[Double](default)
 
-  def getStringArg(name: String): java.lang.String = stringArg(name).getOrElse[String]("")
-  def getStringArg(name: String, default: java.lang.String): java.lang.String = stringArg(name).getOrElse[String](default)
+  def getStringArg(name: String): JString = stringArg(name).getOrElse[String]("")
+  def getStringArg(name: String, default: JString): JString = stringArg(name).getOrElse[String](default)
 
-  def getIntArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0L)
-  def getIntArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
+  def getIntArg(name: String): JLong = longArg(name).getOrElse[Long](0L)
+  def getIntArg(name: String, default: JLong): JLong = longArg(name).getOrElse[Long](default)
 
-  def getDurationArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0L)
-  def getDurationArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
+  def getDurationArg(name: String): JLong = longArg(name).getOrElse[Long](0L)
+  def getDurationArg(name: String, default: JLong): JLong = longArg(name).getOrElse[Long](default)
 }

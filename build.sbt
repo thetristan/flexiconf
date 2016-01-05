@@ -65,14 +65,7 @@ lazy val antlr4ConfigSettings = Seq(
   antlr4GenVisitor in Antlr4 := true,
   unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "antlr4")
 
-lazy val testScalastyle = taskKey[Unit]("Run scalastyle for main sources as part of test")
-lazy val testScalastyleForTests = taskKey[Unit]("Run scalastyle for test sources as part of test")
-
-lazy val scalastyleSettings = Seq(
-  scalastyleFailOnError := true,
-  testScalastyle := (scalastyle in Compile).toTask("").value,
-  testScalastyleForTests := (scalastyle in Test).toTask("").value,
-  (test in Test) <<= (test in Test).dependsOn(testScalastyle, testScalastyleForTests))
+lazy val scalastyleSettings = Seq(scalastyleFailOnError := true)
 
 // Root project
 lazy val flexiconf = project.in(file("."))

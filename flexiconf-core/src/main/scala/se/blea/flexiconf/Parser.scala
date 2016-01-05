@@ -4,7 +4,10 @@ import java.io.{FileNotFoundException, File, InputStream}
 
 import org.antlr.v4.runtime.{ANTLRInputStream, CommonTokenStream}
 import org.apache.commons.io.FileUtils
+import se.blea.flexiconf.parser._
 import se.blea.flexiconf.parser.gen.{ConfigLexer, ConfigParser, SchemaLexer, SchemaParser}
+
+import scala.util.{Failure, Success, Try}
 
 
 object Parser {
@@ -24,65 +27,46 @@ object Parser {
     new SchemaParser(tokens)
   }
 
-  private[flexiconf] def streamFromSourceFile(sourceFile: String): Option[InputStream] = {
-    try {
-      Some(FileUtils.openInputStream(new File(sourceFile)))
-    } catch {
-      case e: FileNotFoundException => None
-    }
+  private[flexiconf] def streamFromSourceFile(sourceFile: String): Try[InputStream] = {
+    Try(FileUtils.openInputStream(new File(sourceFile)))
   }
 
   /** Parses and returns a config with the provided options **/
-  def parseConfig(opts: ConfigOptions): Option[Config] = {
-    val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
-    val parser = antlrConfigParserFromStream(stream.get)
-
-    ConfigVisitor(opts.visitorOpts)
-      .visit(parser.document)
-      .map(DefaultConfig)
+  def parseConfig(configFile: String, inputStream: InputStream, schema: Schema, options: ConfigOptions): Try[Config] = {
+    Try {
+      val parser = antlrConfigParserFromStream(inputStream)
+      val configTree = ConfigVisitor(configFile, options).visitDocument(parser.document)
+      DefaultConfig.fromNode(configTree, schema)
+    }
   }
 
   /** Parses and returns a config with the default options and provided schema **/
-  def parseConfig(configFile: String, schema: Schema): Option[Config] = {
-    parseConfig(ConfigOptions
-      .withSourceFile(configFile)
-      .withSchema(schema))
-  }
-
-  /** Parses and returns a config with the default options and provided schema **/
-  def parseConfig(configName: String, configStream: InputStream, schema: Schema): Option[Config] = {
-    parseConfig(ConfigOptions
-      .withInputStream(configName, configStream)
-      .withSchema(schema))
-  }
-
-  /** Parses and returns a config with the default options after parsing the schema with the default options **/
-  def parseConfig(configFile: String, schemaFile: String): Option[Config] = {
-    parseConfig(configFile, parseSchema(schemaFile).get)
-  }
-
-  /** Parses and returns a config with the default options after parsing the schema with the default options **/
-  def parseConfig(configName: String, configStream: InputStream, schemaName: String, schemaStream: InputStream): Option[Config] = {
-    parseConfig(configName, configStream, parseSchema(schemaName, schemaStream).get)
+  def parseConfig(configFile: String, schema: Schema, options: ConfigOptions): Try[Config] = {
+    streamFromSourceFile(configFile) flatMap { inputStream =>
+      parseConfig(configFile, inputStream, schema, options)
+    }
   }
 
   /** Parses and returns a schema with the provided options **/
-  def parseSchema(opts: SchemaOptions): Option[Schema] = {
-    val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
-    val parser = antlrSchemaParserFromStream(stream.get)
-
-    SchemaVisitor(opts.visitorOpts)
-      .visit(parser.document)
-      .map(Schema)
+  def parseSchema(schemaFile: String, inputStream: InputStream): Try[Schema] = {
+    Try {
+      val parser = antlrSchemaParserFromStream(inputStream)
+      val schemaTree = SchemaVisitor(schemaFile).visitDocument(parser.document)
+      DefaultSchema.fromNode(schemaTree)
+    }
   }
 
   /** Parses and returns a schema with the default options **/
-  def parseSchema(schemaFile: String): Option[Schema] = {
-    parseSchema(SchemaOptions.withSourceFile(schemaFile))
+  def parseSchema(schemaFile: String): Try[Schema] = {
+    streamFromSourceFile(schemaFile) flatMap { inputStream =>
+      parseSchema(schemaFile, inputStream)
+    }
   }
 
-  /** Parses and returns a schema with the default options **/
-  def parseSchema(schemaName: String, schemaStream: InputStream): Option[Schema] = {
-    parseSchema(SchemaOptions.withInputStream(schemaName, schemaStream))
+  /** Parses and returns a config with the default options after parsing the schema with the default options **/
+  def parse(configFile: String, schemaFile: String, options: ConfigOptions = ConfigOptions()): Try[Config] = {
+    parseSchema(schemaFile) flatMap { schema =>
+      parseConfig(configFile, schema, options)
+    }
   }
 }

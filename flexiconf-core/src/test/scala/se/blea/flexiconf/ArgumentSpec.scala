@@ -5,13 +5,13 @@ import org.scalatest.{FlatSpec, Matchers}
 /** Test cases for Arguments */
 class ArgumentSpec extends FlatSpec with Matchers {
 
-  private def accepts(v: String)(implicit a: ArgumentKind[_]) = assert(a accepts v)
-  private def rejects(v: String)(implicit a: ArgumentKind[_]) = assert(!(a accepts v))
+  private def accepts(v: String)(implicit a: Type) = assert(a accepts v)
+  private def rejects(v: String)(implicit a: Type) = assert(!(a accepts v))
 
   behavior of "StringArument"
 
   it should "return strings for string values" in {
-    val a = StringArgument
+    val a = StringType
     val res: String = a.valueOf("foo")
 
     assert(res == "foo")
@@ -19,7 +19,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   }
 
   it should "recognize and accept string values" in {
-    implicit val a = StringArgument
+    implicit val a = StringType
 
     accepts("\"hello\"")
     accepts("'world'")
@@ -40,7 +40,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   behavior of "IntArgument"
 
   it should "return longs for int values" in {
-    val a = IntArgument
+    val a = IntType
     val res: Long = a.valueOf("101")
 
     assert(res == 101L)
@@ -48,7 +48,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   }
 
   it should "recognize and accept integer values" in {
-    implicit val a = IntArgument
+    implicit val a = IntType
 
     rejects("\"hello\"")
     rejects("'world'")
@@ -69,7 +69,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   behavior of "DecimalArgument"
 
   it should "return doubles for decimal values" in {
-    val a = DecimalArgument
+    val a = DecimalType
     val res: Double = a.valueOf("101.00001")
 
     assert(res == 101.00001)
@@ -77,7 +77,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   }
 
   it should "recognize and accept decimal values" in {
-    implicit val a = DecimalArgument
+    implicit val a = DecimalType
 
     rejects("\"hello\"")
     rejects("'world'")
@@ -97,7 +97,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   behavior of "DurationArgument"
 
   it should "return longs for duration arguments" in {
-    val a = DurationArgument
+    val a = DurationType
     val res: Long = a.valueOf("10s")
 
     assert(res == 10000)
@@ -105,7 +105,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   }
 
   it should "recognize and accept duration values" in {
-    implicit val a = DurationArgument
+    implicit val a = DurationType
 
     rejects("\"hello\"")
     rejects("'world'")
@@ -128,7 +128,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   behavior of "PercentageArgument"
 
   it should "return doubles for percentage arguments" in {
-    val a = PercentageArgument
+    val a = PercentageType
     val res: Double = a.valueOf("50%")
 
     assert(res == 0.5)
@@ -136,7 +136,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   }
 
   it should "recognize and accept percentage values" in {
-    implicit val a = PercentageArgument
+    implicit val a = PercentageType
 
     rejects("\"hello\"")
     rejects("'world'")
@@ -157,7 +157,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   behavior of "BoolArgument"
 
   it should "return booleans for boolean values" in {
-    val a = BoolArgument
+    val a = BoolType
 
     Seq("true", "y", "yes", "on") foreach { v =>
       val res: Boolean = a.valueOf(v)
@@ -173,7 +173,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
   }
 
   it should "recognize and accept boolean values" in {
-    implicit val a = BoolArgument
+    implicit val a = BoolType
 
     rejects("\"hello\"")
     rejects("'world'")

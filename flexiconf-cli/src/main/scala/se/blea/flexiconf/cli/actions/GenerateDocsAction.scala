@@ -2,12 +2,14 @@ package se.blea.flexiconf.cli.actions
 
 import java.io.FileOutputStream
 
-import se.blea.flexiconf.SchemaOptions
+import se.blea.flexiconf.Parser
 import se.blea.flexiconf.cli.{CLI, OptionParser}
 import se.blea.flexiconf.docgen.TemplateDocGenerator
 
 /** Generate documentation for a schema */
 object GenerateDocsAction extends Action {
+  import se.blea.flexiconf.Parser._
+
   override def name: String = "generate-docs"
   override def usage: String = "[-t|--template templatePath] <schemaPath> [target]"
   override def documentation: String = "Generate schema documentation, outputs to stdout if target is not given"
@@ -26,10 +28,7 @@ object GenerateDocsAction extends Action {
     val schemaPath = args(0)
     val documentationFilePath = args.lift(1)
 
-    for {
-      schemaOpts <- Some(SchemaOptions.withSourceFile(schemaPath))
-      schema <- parseSchema(schemaOpts)
-    } yield {
+    parseSchema(schemaPath) map { schema =>
       val out = documentationFilePath.map(new FileOutputStream(_)).getOrElse(CLI.outStream)
       out.write(new TemplateDocGenerator(options.templatePath).process(schema).getBytes)
     }

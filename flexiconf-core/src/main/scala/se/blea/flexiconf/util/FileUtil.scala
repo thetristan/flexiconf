@@ -1,6 +1,5 @@
-package se.blea.flexiconf
+package se.blea.flexiconf.util
 
-import java.io.File
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
 

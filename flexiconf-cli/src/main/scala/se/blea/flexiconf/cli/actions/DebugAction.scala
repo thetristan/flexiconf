@@ -17,7 +17,9 @@ object DebugAction extends Action {
     val schemaPath = args(1)
 
     parseWithWarnings(configPath, schemaPath, { config =>
-      CLI.out(config.renderDebugTree)
+      import se.blea.flexiconf.helpers.RenderHelpers._
+
+      CLI.out(config.renderTree())
 
       if (config.warnings.nonEmpty) {
         CLI.out("Warnings:")

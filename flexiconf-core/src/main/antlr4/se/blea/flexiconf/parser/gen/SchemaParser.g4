@@ -16,11 +16,11 @@ directive
  : include
  | group
  | use
- | userDirective
+ | definition
  ;
 
-userDirective
- : documentationBlock? directiveName parameterList? flagList? ( LBRACE directiveList RBRACE | SEMI )
+definition
+ : documentationBlock? definitionName parameterList? flagList? ( LBRACE directiveList RBRACE | SEMI )
  ;
 
 documentationBlock
@@ -52,7 +52,7 @@ stringArgument
  | unquotedStringValue
  ;
 
-directiveName
+definitionName
  : UNQUOTED_STRING_LITERAL
  ;
 
@@ -61,12 +61,16 @@ flagList
  ;
 
 flag
- : flagAllowOnce
- | unknown
+ : flagName ( EQ flagValue )?
  ;
 
-flagAllowOnce
- : FLAG_ALLOW_ONCE_LITERAL
+flagName
+ : UNQUOTED_STRING_LITERAL
+ ;
+
+flagValue
+ : STRING_LITERAL
+ | UNQUOTED_STRING_LITERAL
  ;
 
 parameterList
@@ -74,22 +78,20 @@ parameterList
  ;
 
 parameter
- : parameterName COLON parameterValue
- | parameterName
+ : parameterName ( COLON parameterType )?
  ;
 
 parameterName
  : UNQUOTED_STRING_LITERAL
  ;
 
-parameterValue
- : integerType
- | decimalType
- | durationType
- | percentageType
- | booleanType
- | stringType
- | unknown
+parameterType
+ : STRING_TYPE_LITERAL
+ | BOOLEAN_TYPE_LITERAL
+ | INT_TYPE_LITERAL
+ | DECIMAL_TYPE_LITERAL
+ | PERCENTAGE_TYPE_LITERAL
+ | DURATION_TYPE_LITERAL
  ;
 
 quotedStringValue
@@ -99,32 +101,3 @@ quotedStringValue
 unquotedStringValue
 : UNQUOTED_STRING_LITERAL
 ;
-
-stringType
- : STRING_TYPE_LITERAL
- ;
-
-integerType
- : INT_TYPE_LITERAL
- ;
-
-decimalType
- : DECIMAL_TYPE_LITERAL
- ;
-
-durationType
- : DURATION_TYPE_LITERAL
- ;
-
-percentageType
- : PERCENTAGE_TYPE_LITERAL
- ;
-
-booleanType
- : BOOLEAN_TYPE_LITERAL
- ;
-
-unknown
- : UNQUOTED_STRING_LITERAL
- ;
-

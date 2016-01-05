@@ -9,20 +9,20 @@ object InspectAction extends Action {
   override def documentation: String = "Parse config, print configuration tree and warnings to stdout"
 
   override def apply(args: List[String]): Unit = {
-    if (args.length != 2) {
-      exitWithUsageError()
+    args match {
+      case configPath :: schemaPath :: Nil =>
+        parseWithWarnings(configPath, schemaPath, { config =>
+          import se.blea.flexiconf.helpers.RenderHelpers._
+
+          CLI.out(config.renderTree())
+
+          if (config.warnings.nonEmpty) {
+            CLI.err("Warnings:")
+            config.warnings.foreach(w => CLI.err(s"- $w"))
+          }
+        })
+
+      case _ => exitWithUsageError()
     }
-
-    val configPath = args(0)
-    val schemaPath = args(1)
-
-    parseWithWarnings(configPath, schemaPath, { config =>
-      CLI.out(config.renderTree)
-
-      if (config.warnings.nonEmpty) {
-        CLI.err("Warnings:")
-        config.warnings.foreach(w => CLI.err(s"- $w"))
-      }
-    })
   }
 }

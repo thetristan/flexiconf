@@ -6,38 +6,32 @@ import se.blea.flexiconf._
 
 class DirectiveSpec extends FlatSpec with Matchers {
   val arguments = List(
-    flexiconf.Argument("foo", StringArgument, "string"),
-    flexiconf.Argument("123", IntArgument, "int"),
-    flexiconf.Argument("off", BoolArgument, "boolean"),
-    flexiconf.Argument("10.1", DecimalArgument, "decimal"),
-    flexiconf.Argument("100%", PercentageArgument, "percentage"),
-    flexiconf.Argument("15m", DurationArgument, "duration")
+    StringArg("foo"),
+    IntArg("123"),
+    BoolArg("off"),
+    DecimalArg("10.1"),
+    PercentageArg("100%"),
+    DurationArg("15m")
   )
 
-  val d1 = DirectiveDefinition.withName("foo").build
-  val d2 = DirectiveDefinition.withName("bar").build
-  val d3 = DirectiveDefinition.withName("baz")
-    .withStringArg("arg1")
-    .build
+  val d1 = DefaultDefinition("foo")
+  val d2 = DefaultDefinition("bar")
+  val d3 = DefaultDefinition("baz", List(StringParam("arg1")))
 
-  val root = DirectiveDefinition.withName("directive")
-    .withStringArg("string")
-    .withIntArg("int")
-    .withBoolArg("boolean")
-    .withDecimalArg("decimal")
-    .withPercentageArg("percentage")
-    .withDurationArg("duration")
-    .withDirectives(d1, d2, d3)
-    .build
+  val root = DefaultDefinition(
+    name = "directive",
+    params = List(
+      StringParam("string"),
+      IntParam("int"),
+      BoolParam("boolean"),
+      DecimalParam("decimal"),
+      PercentageParam("percentage"),
+      DurationParam("duration")
+    ),
+    definitions = Set(d1, d2, d3)
+  )
 
-  val node1 = ConfigNode(d1, List.empty, Source("-", 0, 0))
-  val node2 = ConfigNode(d2, List.empty, Source("-", 0, 0))
-
-  val rootNode = ConfigNode(root, arguments, Source("-", 0, 0))
-    .copy(children = List(node1, node2))
-
-  val directive = new Directive(new DefaultDirective(rootNode))
-
+  val directive = new Directive(DefaultDirective(root, arguments, List(DefaultDirective(d1), DefaultDirective(d2))))
 
   behavior of "getName"
 

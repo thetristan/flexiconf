@@ -18,6 +18,10 @@ STRING_TYPE_LITERAL
  : 'String'
  ;
 
+BOOLEAN_TYPE_LITERAL
+ : 'Bool'
+ ;
+
 INT_TYPE_LITERAL
  : 'Int'
  ;
@@ -32,14 +36,6 @@ DURATION_TYPE_LITERAL
 
 PERCENTAGE_TYPE_LITERAL
  : 'Percentage'
- ;
-
-BOOLEAN_TYPE_LITERAL
- : 'Bool'
- ;
-
-FLAG_ALLOW_ONCE_LITERAL
- : 'once'
  ;
 
 EQ

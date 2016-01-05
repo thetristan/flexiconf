@@ -2,8 +2,16 @@ package se.blea.flexiconf
 
 import org.scalatest.{Matchers, FlatSpec}
 
+import scala.util.{Failure, Success}
+
 class ConfigUsageSpec extends FlatSpec with Matchers {
-  lazy val config = Parser.parseConfig(Configs.README, Schemas.README) getOrElse { fail("Couldn't load config") }
+  lazy val config = Parser.parse(Configs.README, Schemas.README) match {
+    case Success(c) => c
+    case Failure(ex) =>
+      ex.printStackTrace()
+      fail("Couldn't load config", ex)
+  }
+
   lazy val server = config \ "server"
 
 

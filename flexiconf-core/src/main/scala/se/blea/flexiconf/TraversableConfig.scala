@@ -47,7 +47,4 @@ trait TraversableConfig {
   def \\ : List[Directive] = directives
   def \\(names: String*): List[Directive] = directives(names:_*)
   // scalastyle:on method.name
-
-  /** Return all warnings for this directive and its children **/
-  def warnings: List[String]
 }
