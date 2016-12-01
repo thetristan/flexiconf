@@ -32,7 +32,7 @@ private[flexiconf] case class SchemaVisitor(options: SchemaVisitorOptions,
     val includePath = FileUtil.resolvePath(currentPath, includePattern).toString
 
     Parser.streamFromSourceFile(includePath) flatMap { inputStream =>
-      val parser = Parser.antlrSchemaParserFromStream(inputStream)
+      val parser = Parser.antlrSchemaParserFromStream(inputStream, includePath)
 
       SchemaVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
         DefaultSchemaNode(name = "$include",

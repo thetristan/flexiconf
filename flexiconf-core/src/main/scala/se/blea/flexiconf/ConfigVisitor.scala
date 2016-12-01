@@ -32,7 +32,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
     val node = ConfigNode(DirectiveDefinition.include(allowedDirectives), ArgumentVisitor(ctx.stringArgument), sourceFromContext(ctx))
 
     Parser.streamFromSourceFile(includePath) flatMap { inputStream =>
-      val parser = Parser.antlrConfigParserFromStream(inputStream)
+      val parser = Parser.antlrConfigParserFromStream(inputStream, includePath)
 
       stack.enterFrame(ConfigVisitorContext(node)) {
         ConfigVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>

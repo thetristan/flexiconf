@@ -1,27 +1,57 @@
 package se.blea.flexiconf
 
-import java.io.{FileNotFoundException, File, InputStream}
+import java.io.{File, FileNotFoundException, InputStream}
 
-import org.antlr.v4.runtime.{ANTLRInputStream, CommonTokenStream}
+import org.antlr.v4.runtime._
 import org.apache.commons.io.FileUtils
 import se.blea.flexiconf.parser.gen.{ConfigLexer, ConfigParser, SchemaLexer, SchemaParser}
 
 
 object Parser {
-  private[flexiconf] def antlrConfigParserFromStream(inputStream: InputStream) = {
-    val input = new ANTLRInputStream(inputStream)
-    val lexer = new ConfigLexer(input)
-    val tokens = new CommonTokenStream(lexer)
-
-    new ConfigParser(tokens)
+  private[flexiconf] val errorListener = new BaseErrorListener {
+    override def syntaxError(
+      recognizer: Recognizer[_, _],
+      offendingSymbol: scala.Any,
+      line: Int,
+      charPositionInLine: Int,
+      msg: String,
+      e: RecognitionException
+    ): Unit = {
+      val sourceName = recognizer.getInputStream.getSourceName
+      Console.err.println(s"$sourceName:$line:$charPositionInLine:$msg") // scalastyle:ignore
+    }
   }
 
-  private[flexiconf] def antlrSchemaParserFromStream(inputStream: InputStream) = {
+  private[flexiconf] def antlrConfigParserFromStream(inputStream: InputStream, name: String) = {
     val input = new ANTLRInputStream(inputStream)
-    val lexer = new SchemaLexer(input)
+    input.name = name
+
+    val lexer = new ConfigLexer(input)
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(errorListener)
+
     val tokens = new CommonTokenStream(lexer)
 
-    new SchemaParser(tokens)
+    val parser = new ConfigParser(tokens)
+    parser.removeErrorListeners()
+    parser.addErrorListener(errorListener)
+    parser
+  }
+
+  private[flexiconf] def antlrSchemaParserFromStream(inputStream: InputStream, name: String) = {
+    val input = new ANTLRInputStream(inputStream)
+    input.name = name
+
+    val lexer = new SchemaLexer(input)
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(errorListener)
+
+    val tokens = new CommonTokenStream(lexer)
+
+    val parser = new SchemaParser(tokens)
+    parser.removeErrorListeners()
+    parser.addErrorListener(errorListener)
+    parser
   }
 
   private[flexiconf] def streamFromSourceFile(sourceFile: String): Option[InputStream] = {
@@ -35,7 +65,7 @@ object Parser {
   /** Parses and returns a config with the provided options **/
   def parseConfig(opts: ConfigOptions): Option[Config] = {
     val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
-    val parser = antlrConfigParserFromStream(stream.get)
+    val parser = antlrConfigParserFromStream(stream.get, opts.sourceFile)
 
     ConfigVisitor(opts.visitorOpts)
       .visit(parser.document)
@@ -69,7 +99,7 @@ object Parser {
   /** Parses and returns a schema with the provided options **/
   def parseSchema(opts: SchemaOptions): Option[Schema] = {
     val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
-    val parser = antlrSchemaParserFromStream(stream.get)
+    val parser = antlrSchemaParserFromStream(stream.get, opts.sourceFile)
 
     SchemaVisitor(opts.visitorOpts)
       .visit(parser.document)

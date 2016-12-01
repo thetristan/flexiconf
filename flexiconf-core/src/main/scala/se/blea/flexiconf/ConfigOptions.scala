@@ -57,7 +57,9 @@ case class ConfigOptions private (private[flexiconf] val sourceFile: String = ""
 
 object ConfigOptions {
   def withSourceFile(sourceFile: String): ConfigOptions = ConfigOptions(sourceFile = sourceFile)
-  def withInputStream(streamName: String, inputStream: InputStream): ConfigOptions = ConfigOptions(inputStream = Option(inputStream))
+  def withInputStream(streamName: String, inputStream: InputStream): ConfigOptions = {
+    ConfigOptions(inputStream = Option(inputStream), sourceFile = streamName)
+  }
 }
 
 
